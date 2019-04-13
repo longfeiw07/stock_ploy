@@ -11,6 +11,7 @@ def test():
     write_excel(df)
 #获取沪深A股票资金流向数据，分析大单小单成交情况，用于判别资金动向
 def get_stock_private():
+    pro = ts.pro_api()
     data = pro.moneyflow(trade_date='20190329')
     return data
 #获取大单交易数据，默认为大于等于400手，数据来源于新浪财经。
@@ -44,6 +45,6 @@ def get_stock_list():
     data = pro.stock_basic(exchange='', list_status='L', fields='symbol,name')
     return data
 if __name__ == "__main__":
-    ts.set_token("5e9d772f754320c8f903311ac27e32b118248dd47f8ef182ccba62fe")
+    ts.set_token("575ce65400bc3b75a043dbb74a91549425468d78d80e9a0a4cd61706")
     # ts.set_token("8a4d963e3a1027bade337201ce469b63ddd997941c27e3a4f6b485d5")
     test()
