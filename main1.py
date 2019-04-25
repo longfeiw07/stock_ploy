@@ -12,7 +12,7 @@ def test():
 #获取沪深A股票资金流向数据，分析大单小单成交情况，用于判别资金动向
 def get_stock_private():
     pro = ts.pro_api()
-    data = pro.moneyflow(trade_date='20190329')
+    data = pro.moneyflow(trade_date='20190417')
     return data
 #获取大单交易数据，默认为大于等于400手，数据来源于新浪财经。
 def get_big_deal():
