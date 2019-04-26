@@ -73,14 +73,14 @@ class Reptile():
             else:
                 title_lst.append(key)
         # print('title_lst: ', title_lst)
-        with open('eastmoney.csv', 'a', encoding='utf_8_sig', newline='') as f:
+        with open('resource/eastmoney.csv', 'a', encoding='utf_8_sig', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(title_lst)
     def WriteTable(self, data):
         # print(data)
         for d in data[2]:
             # print('d: ', d)
-            with open('eastmoney.csv', 'a', encoding='utf_8_sig', newline='') as f:
+            with open('resource/eastmoney.csv', 'a', encoding='utf_8_sig', newline='') as f:
                 if d['Ltsz'] != '' or d['Ltsz']:
                     d['Ltsz'] = round(float(d['Ltsz'])/100000000.0)
                 if d['JmMoney'] != '':

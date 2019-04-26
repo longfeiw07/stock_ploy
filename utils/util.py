@@ -38,7 +38,7 @@ title = {"code":"代码", "symbol": "ID", "name": "名称", "industry": "所属�
 longhu_title = {'SCode': '代码','SName': '名称','ClosePrice': '收盘价','Chgradio': '涨跌幅','Dchratio': '换手率','JmMoney': '龙虎榜净买额(万)','Turnover': '市场总成交额(万)',
     'Ntransac': '','Ctypedes': '上榜原因','Oldid': '','Smoney': '龙虎榜卖出额(万)','BMoney': '龙虎榜买入额(万)',
     'ZeMoney': '龙虎榜成交额(万)','Tdate': '上榜日','JmRate': '净买额占总成交比','ZeRate': '成交额占总成交比',
-    'Ltsz': '流通市场(亿)','Rchange1dc': '上榜后1日','Rchange1do': '','Rchange2dc': '上榜后2日','Rchange2do':'','Rchange3dc':'',
+    'Ltsz': '流通市值(亿)','Rchange1dc': '上榜后1日','Rchange1do': '','Rchange2dc': '上榜后2日','Rchange2do':'','Rchange3dc':'',
     'Rchange3do': '','Rchange5dc':'上榜后5日','Rchange5do':'','Rchange10dc':'上榜后10日','Rchange10do':'','Rchange15dc':'','Rchange15do':'',
     'Rchange20dc':'','Rchange20do':'','Rchange30dc':'','Rchange30do':'','Rchange1m':'','Rchange3m':'','Rchange6m':'','Rchange1y':'','SumCount':'','JGBSumCount':'',
     'JGSSumCount':'','JGBMoney':'','JGSMoney':'','JGJMMoney':'','DP':'解读'}

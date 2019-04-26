@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from utils.reptile import Reptile
 import argparse
+from utils.network import NeuralNetworks
 def main():
     parser = argparse.ArgumentParser(description='读取CSV文件')
     parser.add_argument('-s', dest='start',  help='开始日期', default='')
@@ -12,4 +13,6 @@ def main():
         rep.StartReptile()
 
 if __name__ == "__main__":
-    main()
+#     main()
+        network = NeuralNetworks()
+        network.NeuralNetwork()
