@@ -100,8 +100,8 @@ class Reptile():
             print('时间间隔不足2天，数据不全')
             return
 
-        if self.isAppend == 'no':
-            self.WriteHeader(self.GetTable(1, start, end)[2])
+        # if self.isAppend == 'no':
+        #     self.WriteHeader(self.GetTable(1, start, end)[2])
         page_all = int(self.GetTable(1, start, end)[0])
         for page in range(1, page_all):
             data = self.GetTable(page, start,end)
@@ -111,6 +111,9 @@ class Reptile():
         """
         """
         print('天数：', self.CalTime(self.startTime, self.endTime))
+        if self.isAppend == 'no':
+            self.WriteHeader(self.GetTable(1, self.startTime, self.DesignatedOneDay(self.startTime, 2))[2])
+
         if self.IsData(self.startTime) and self.IsData(self.endTime):
             if self.CalTime(self.startTime, self.endTime) <= 30:
                 self.GetAllDatas(self.startTime, self.endTime)
