@@ -39,20 +39,22 @@ class Reptile():
         response = requests.get(url, params=params).text
         return response
     def ToJsonForm(self, titles, value):
+        """
+        生成器
+        """
         title_lst = titles.split(',')
         data = re.search(r"\[(.*?)\]", value).group(1)
-        print('data: ', data)
+        # print('data: ', data)
         value_lst = re.finditer(r"\"(.*?)\"", data)
-        data_lst = []
-        print('value_lst: ', value_lst)
+        # print('value_lst: ', value_lst)
         for v_item in value_lst:
-            print(v_item.group())
+            # print(v_item.group())
             item_lst =  re.search(r"\"(.*?)\"", v_item.group()).group(1).split("|")
             dict_item = {}
             for (title_item, value_item) in zip(title_lst, item_lst):
                 dict_item[title_item] = value_item
-            data_lst.append(dict_item)
-        return data_lst
+            # data_lst.append(dict_item)
+            yield dict_item
 
 
     def GetTable(self, page, start, end):
@@ -72,9 +74,9 @@ class Reptile():
                 break
             index -= 1
         
-        datas = self.ToJsonForm(title, data)
+        datas_iter = self.ToJsonForm(title, data)
         # print(title)
-        return page_all, title, datas
+        return page_all, title, datas_iter
     def WriteHeader(self, data):
         title_lst = []
         for key, value in util.longhu_title.items():
@@ -86,10 +88,10 @@ class Reptile():
         with open('resource/eastmoney.csv', 'a', encoding='utf_8_sig', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(title_lst)
-    def WriteTable(self, data):
-        # print(data)
-        for d in data[2]:
-            # print('d: ', d)
+    def WriteTable(self, dataiter):
+        print("dataiter: ", dataiter)
+        for d in dataiter:
+            print('d: ', d)
             with open('resource/eastmoney.csv', 'a', encoding='utf_8_sig', newline='') as f:
                 if d['Ltsz'] != '' or d['Ltsz']:
                     d['Ltsz'] = round(float(d['Ltsz'])/100000000.0)
@@ -114,8 +116,8 @@ class Reptile():
         #     self.WriteHeader(self.GetTable(1, start, end)[2])
         page_all = int(self.GetTable(1, start, end)[0])
         for page in range(1, page_all):
-            data = self.GetTable(page, start,end)
-            self.WriteTable(data)
+            datas_iter = self.GetTable(page, start,end)[2]
+            self.WriteTable(datas_iter)
         
     def StartReptile(self):
         """
