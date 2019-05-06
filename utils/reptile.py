@@ -9,9 +9,16 @@ import time
 import datetime
 class Reptile():
     def __init__(self, start, end, isappend):
-        self.startTime = start
-        self.endTime = end
+        self._startTime = start
+        self._endTime = end
         self.isAppend = isappend
+    @staticmethod
+    def is_valid(start, end):
+        if start != '' and end != '':
+            return True
+        else:
+            return False
+
     def GetUrl(self):
         url = "http://datainterface3.eastmoney.com//EM_DataCenter_V3/api/LHBGGDRTJ/GetLHBGGDRTJ?"
         return url
@@ -34,13 +41,13 @@ class Reptile():
     def ToJsonForm(self, titles, value):
         title_lst = titles.split(',')
         data = re.search(r"\[(.*?)\]", value).group(1)
-        value_lst = data.split(",")
+        print('data: ', data)
+        value_lst = re.finditer(r"\"(.*?)\"", data)
         data_lst = []
-        # print(value_lst)
+        print('value_lst: ', value_lst)
         for v_item in value_lst:
-            v_item = re.search(r"\"(.*?)\"", v_item).group(1)
-            item_lst = v_item.split("|")
-            # print(v_item)
+            print(v_item.group())
+            item_lst =  re.search(r"\"(.*?)\"", v_item.group()).group(1).split("|")
             dict_item = {}
             for (title_item, value_item) in zip(title_lst, item_lst):
                 dict_item[title_item] = value_item
@@ -49,19 +56,22 @@ class Reptile():
 
 
     def GetTable(self, page, start, end):
-        response = self.GetResponse(page, start, end)
-        print('response', response)
-        page_all = re.search(r"\"TotalPage\":(\d+)", response).group(1)
-        title = re.search(r"\"FieldName\":\"(.*?)\"", response).group(1)
-        # print(page_all)
-        result = re.search(r"\"Data\":(\[.*\])", response).group(1)
-        data = re.search(r"\"Data\":(\[.*?\])", result).group(1)
+        index = 3
+        data = ''
+        while index > 0:
+            if data == '' or len(data) == 2:
+                response = self.GetResponse(page, start, end)
+                # print('response', response)
+                page_all = re.search(r"\"TotalPage\":(\d+)", response).group(1)
+                title = re.search(r"\"FieldName\":\"(.*?)\"", response).group(1)
+                # print(page_all)
+                result = re.search(r"\"Data\":(\[.*\])", response).group(1)
+                data = re.search(r"\"Data\":(\[.*?\])", result).group(1)
+                
+            else:
+                break
+            index -= 1
         
-        print("len: ", len(data), type(data))
-        print(page, start, end)
-        if len(data) == 2:
-            print('无值')
-            return
         datas = self.ToJsonForm(title, data)
         # print(title)
         return page_all, title, datas
@@ -110,22 +120,22 @@ class Reptile():
     def StartReptile(self):
         """
         """
-        print('天数：', self.CalTime(self.startTime, self.endTime))
+        print('天数：', self.CalTime(self._startTime, self._endTime))
         if self.isAppend == 'no':
-            self.WriteHeader(self.GetTable(1, self.startTime, self.DesignatedOneDay(self.startTime, 2))[2])
+            self.WriteHeader(self.GetTable(1, self._startTime, self.DesignatedOneDay(self._startTime, 2))[2])
 
-        if self.IsData(self.startTime) and self.IsData(self.endTime):
-            if self.CalTime(self.startTime, self.endTime) <= 30:
-                self.GetAllDatas(self.startTime, self.endTime)
+        if self.IsData(self._startTime) and self.IsData(self._endTime):
+            if self.CalTime(self._startTime, self._endTime) <= 30:
+                self.GetAllDatas(self._startTime, self._endTime)
             else:
-                start = self.startTime
-                end = self.endTime
+                start = self._startTime
+                end = self._endTime
                 while self.CalTime(start, end) >= 0:
                     try:
                         start = self.DesignatedOneDay(end, -30)
                     except:
                         print("相差不到30天")
-                        start = self.startTime
+                        start = self._startTime
                       
                     self.GetAllDatas(start, end)
                     end = start
