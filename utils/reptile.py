@@ -12,6 +12,7 @@ class Reptile():
         self._startTime = start
         self._endTime = end
         self.isAppend = isappend
+        self.__pageAll = 0
     @staticmethod
     def is_valid(start, end):
         if start != '' and end != '':
@@ -63,8 +64,8 @@ class Reptile():
         while index > 0:
             if data == '' or len(data) == 2:
                 response = self.GetResponse(page, start, end)
-                # print('response', response)
-                page_all = re.search(r"\"TotalPage\":(\d+)", response).group(1)
+                # print('response:', response)
+                self.__pageAll = re.search(r"\"TotalPage\":(\d+)", response).group(1)
                 title = re.search(r"\"FieldName\":\"(.*?)\"", response).group(1)
                 # print(page_all)
                 result = re.search(r"\"Data\":(\[.*\])", response).group(1)
@@ -76,7 +77,7 @@ class Reptile():
         
         datas_iter = self.ToJsonForm(title, data)
         # print(title)
-        return page_all, title, datas_iter
+        return title, datas_iter
     def WriteHeader(self, data):
         title_lst = []
         for key, value in util.longhu_title.items():
@@ -85,13 +86,13 @@ class Reptile():
             else:
                 title_lst.append(key)
         # print('title_lst: ', title_lst)
-        with open('resource/eastmoney.csv', 'a', encoding='utf_8_sig', newline='') as f:
+        with open('resource/eastmoney.csv', 'w', encoding='utf_8_sig', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(title_lst)
     def WriteTable(self, dataiter):
-        print("dataiter: ", dataiter)
+        # print("dataiter: ", dataiter)
         for d in dataiter:
-            print('d: ', d)
+            # print('d: ', d)
             with open('resource/eastmoney.csv', 'a', encoding='utf_8_sig', newline='') as f:
                 if d['Ltsz'] != '' or d['Ltsz']:
                     d['Ltsz'] = round(float(d['Ltsz'])/100000000.0)
@@ -111,12 +112,8 @@ class Reptile():
         if self.CalTime(start, end) < 2:
             print('时间间隔不足2天，数据不全')
             return
-
-        # if self.isAppend == 'no':
-        #     self.WriteHeader(self.GetTable(1, start, end)[2])
-        page_all = int(self.GetTable(1, start, end)[0])
-        for page in range(1, page_all):
-            datas_iter = self.GetTable(page, start,end)[2]
+        for page in range(1, self.__pageAll):
+            datas_iter = self.GetTable(page, start,end)[1]
             self.WriteTable(datas_iter)
         
     def StartReptile(self):
@@ -124,7 +121,7 @@ class Reptile():
         """
         print('天数：', self.CalTime(self._startTime, self._endTime))
         if self.isAppend == 'no':
-            self.WriteHeader(self.GetTable(1, self._startTime, self.DesignatedOneDay(self._startTime, 2))[2])
+            self.WriteHeader(self.GetTable(0, self._startTime, self.DesignatedOneDay(self._startTime, 2))[2])
 
         if self.IsData(self._startTime) and self.IsData(self._endTime):
             if self.CalTime(self._startTime, self._endTime) <= 30:
