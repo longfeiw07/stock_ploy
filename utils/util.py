@@ -33,6 +33,11 @@ title = {"code":"代码", "symbol": "ID", "name": "名称", "industry": "所属�
 "net_mf_amount": "净流入额（万元）",
 "trade_date": "交易日期", "pre_close": "昨收价",
 "change": "涨跌额","pct_chg": "涨跌幅","vol": "成交量 （手）",
+'colse0': "收盘价0",
+'to_excel':'换手率',
+'purchase_sum':'主力买入总量',
+'purchase_sum_per': '主力控盘比例'
+
 }
 
 longhu_title = {'SCode': '代码','SName': '名称','ClosePrice': '收盘价','Chgradio': '涨跌幅','Dchratio': '换手率','JmMoney': '龙虎榜净买额(万)','Turnover': '市场总成交额(万)',

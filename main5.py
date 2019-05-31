@@ -9,8 +9,9 @@ import copy
 import pandas as pd
 import datetime
 import openpyxl
+import gc
 
-def write_excel(data):
+def write_excel(data, filename='all'):
     columns = data.columns
     print(columns.values)
     # print(type(columns))
@@ -18,7 +19,7 @@ def write_excel(data):
     for index, name in enumerate(title):
         title[index] = util.title[name]
         # print(title)
-    path = os.path.join(util.get_file_path(), "resource", "all.xlsx")
+    path = os.path.join(util.get_file_path(), "resource", filename+'.xlsx')
     data.to_excel(path)
 
 ##获取股票列表
@@ -155,7 +156,7 @@ def isOverTime():
     now = datetime.datetime.now()
     now_str = now.strftime('%Y%m%d %H%M%S')
     timer = now_str.split(' ')
-    if int(str(timer[1][:2])) < 17:
+    if int(str(timer[1][:2])) < 18:
         return True
     else:
         return False
@@ -208,7 +209,98 @@ def getFiveDaysTurnover():
     df_shoot = pd.DataFrame(result, columns=list({'symbol', 'name'}))    
     write_excel(df_shoot)
 
+def getMainControlPanelRatio(days):
+    """
+    多支股票主力控盘比例
+    """
+    pro = ts.pro_api()
+    tock_names = get_stock_list()
+    # print(tock_names.columns.values.tolist())
+    tock_names.set_index(['ts_code'], inplace = True, drop=True)
+    daily_basic_all = pd.DataFrame(None, columns=['ts_code','turnover_rate', 'float_share'])
+    for day in getIterator(days):
+        print(day)
+        daily_basic = pro.daily_basic(ts_code='', trade_date=day,fields='ts_code,turnover_rate,float_share') 
+        daily_basic.set_index(['ts_code'], inplace = True, drop=True)
+        # print(daily_basic)
+        for index, row in daily_basic.iterrows():
+            if daily_basic_all.empty:
+                daily_basic_all = copy.deepcopy(daily_basic) 
+                daily_basic_all['symbol'] = 0
+                # print('daily_basic_all:',daily_basic_all)
+            else:
+                if index in daily_basic_all.index.values:
+                    daily_basic_all.loc[index, 'turnover_rate'] += row['turnover_rate']
+            if index in tock_names.index.values:
+                daily_basic_all.loc[index, 'symbol'] = tock_names['symbol'][index]
+
+    daily_basic_all = daily_basic_all[daily_basic_all['turnover_rate'] > 15]
+    print('daily_basic_all:', daily_basic_all)
+    del tock_names
+    gc.collect()
+
+    daily_basic_all['purchase_sum'] = 0
+    daily_basic_all['purchase_sum_per'] = 0
+    for day in getIterator(days):
+        for index, row in daily_basic_all.iterrows():
+            symbol = '{:0>6}'.format(int(row["symbol"]))
+            print('symbol:', symbol)
+            day = day[:4] + '-' + day [4:6]+ '-' + day[6:]
+            historical_tick = ts.get_tick_data(symbol,date=day,src='tt', retry_count=10,pause=5)
+            buy_amount = 0
+            sell_amount = 0
+            for index1, row1 in historical_tick.iterrows():
+                if row1['type'] == u'买盘':
+                    buy_amount += row1['volume']
+                else:
+                    sell_amount += row1['volume']
+            main_day_amount = (buy_amount/2 + sell_amount/10) / 2
+            daily_basic_all.loc[index, 'purchase_sum'] += main_day_amount
+            # print(index, daily_basic_all['purchase_sum'][index])
+            if day == getMaxDay(days):
+                daily_basic_all.loc[index, 'purchase_sum_per'] = float(100*daily_basic_all['purchase_sum'][index])/daily_basic_all['float_share'][index]
+    
+    daily_basic_all = daily_basic_all.sort_index(axis=0,by='purchase_sum_per',ascending=False)
+    print(daily_basic_all)
+    write_excel(daily_basic_all, 'MainControl')
+def getIterator(days):
+    """
+    获取days前的迭代器
+    """
+    i = 0
+    max_day = days
+    while i < max_day:
+        date = getDate(i)
+        if isWeekend(date):
+            max_day += 1
+        else: 
+            if i == 0 and isOverTime():
+                max_day += 1
+            else:
+                yield date
+        i += 1
+def getMaxDay(days):
+    """
+    获取days天前的日期
+    """
+    i = 0
+    max_day = days
+    while i < max_day:
+        date = getDate(i)
+        if isWeekend(date):
+            max_day += 1
+        else: 
+            if i == 0 and isOverTime():
+                 max_day += 1
+        i += 1
+    return getDate(max_day - 1)
+def test():
+    day = '20190531'
+    day = day[:4] + '-' + day [4:6]+ '-' + day[6:]
+    print(day)
 if __name__ == "__main__":
     ts.set_token("7e10445dc47be74db4cac3a6ebb22e049ed954d4d070234b36ec738a")
     # ts.set_token("8a4d963e3a1027bade337201ce469b63ddd997941c27e3a4f6b485d5")
-    getFiveDaysTurnover()
+    getMainControlPanelRatio(1)
+    # test()
+    # print(getMaxDay(5))
