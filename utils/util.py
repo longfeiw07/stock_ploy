@@ -34,7 +34,7 @@ title = {"code":"代码", "symbol": "ID", "name": "名称", "industry": "所属�
 "trade_date": "交易日期", "pre_close": "昨收价",
 "change": "涨跌额","pct_chg": "涨跌幅","vol": "成交量 （手）",
 'colse0': "收盘价0",
-'to_excel':'换手率',
+'turnover_rate':'换手率',
 'purchase_sum':'主力买入总量',
 'purchase_sum_per': '主力控盘比例'
 
