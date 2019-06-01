@@ -120,11 +120,15 @@ class DataBaseHandle(object):
         finally:
             self.cursor.close()
 
-    def updateDb(self,tablename,):
+    def updateDb(self,tablename, withdatas, todatas):
         ''' 更新数据库操作 '''
-
+        for k1, v1 in withdatas.items():
+            withdatas = "{0}='{1}'".format(k1,v1)
+        for k2, v2 in todatas.items():
+            todatas = "{0}='{1}'".format(k2,v2)
+        sql_cmd = "UPDATE {0} SET {0} WHERE {1};".format(withdatas, todatas)
+        print('更新数据库:', sql_cmd)
         self.cursor = self.db.cursor()
-
         try:
             # 执行sql
             self.cursor.execute(sql)
@@ -138,14 +142,14 @@ class DataBaseHandle(object):
         finally:
             self.cursor.close()
 
-    def selectDb(self,sql):
+    def selectDb(self,tablename, *col):
         ''' 数据库查询 '''
+
+        sql_cmd = "SELECT {0} FROM {1}".format(col, tablename)
         self.cursor = self.db.cursor()
         try:
             self.cursor.execute(sql) # 返回 查询数据 条数 可以根据 返回值 判定处理结果
-
             data = self.cursor.fetchall() # 返回所有记录列表
-
             print(data)
 
             # 结果遍历
