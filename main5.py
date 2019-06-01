@@ -245,16 +245,7 @@ def getMainControlPanelRatio(days):
         for index, row in daily_basic_all.iterrows():
             symbol = '{:0>6}'.format(int(row["symbol"]))
             print('symbol:', symbol)
-            day1 = day[:4] + '-' + day [4:6]+ '-' + day[6:]
-            historical_tick = ts.get_tick_data(symbol,date=day1,src='tt', retry_count=10,pause=5)
-            buy_amount = 0
-            sell_amount = 0
-            for index1, row1 in historical_tick.iterrows():
-                if row1['type'] == u'买盘':
-                    buy_amount += row1['volume']
-                else:
-                    sell_amount += row1['volume']
-            main_day_amount = (buy_amount/2 + sell_amount/10) / 2
+            main_day_amount = getTickData(symbol, day)
             daily_basic_all.loc[index, 'purchase_sum'] += main_day_amount
             # print(index, daily_basic_all['purchase_sum'][index])
             if day == getMaxDay(days):
@@ -263,6 +254,21 @@ def getMainControlPanelRatio(days):
     daily_basic_all = daily_basic_all.sort_values(axis=0,by='purchase_sum_per',ascending=False)
     print(daily_basic_all)
     write_excel(daily_basic_all, 'MainControl')
+def getTickData(symbol, day):
+    """
+    获取分笔数据
+    """
+    day = day[:4] + '-' + day [4:6]+ '-' + day[6:]
+    historical_tick = ts.get_tick_data(symbol,date=day,src='tt', retry_count=10,pause=5)
+    buy_amount = 0
+    sell_amount = 0
+    for index1, row1 in historical_tick.iterrows():
+        if row1['type'] == u'买盘':
+            buy_amount += row1['volume']
+        else:
+            sell_amount += row1['volume']
+    main_day_amount = (buy_amount/2 + sell_amount/10) / 2
+    return main_day_amount
 def getIterator(days):
     """
     获取days前的生成器
