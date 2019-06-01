@@ -234,7 +234,7 @@ def getMainControlPanelRatio(days):
             if index in tock_names.index.values:
                 daily_basic_all.loc[index, 'symbol'] = tock_names['symbol'][index]
 
-    daily_basic_all = daily_basic_all[daily_basic_all['turnover_rate'] > 15]
+    daily_basic_all = daily_basic_all[daily_basic_all['turnover_rate'] > 50]
     print('daily_basic_all:', daily_basic_all)
     del tock_names
     gc.collect()
@@ -245,8 +245,8 @@ def getMainControlPanelRatio(days):
         for index, row in daily_basic_all.iterrows():
             symbol = '{:0>6}'.format(int(row["symbol"]))
             print('symbol:', symbol)
-            day = day[:4] + '-' + day [4:6]+ '-' + day[6:]
-            historical_tick = ts.get_tick_data(symbol,date=day,src='tt', retry_count=10,pause=5)
+            day1 = day[:4] + '-' + day [4:6]+ '-' + day[6:]
+            historical_tick = ts.get_tick_data(symbol,date=day1,src='tt', retry_count=10,pause=5)
             buy_amount = 0
             sell_amount = 0
             for index1, row1 in historical_tick.iterrows():
@@ -260,12 +260,12 @@ def getMainControlPanelRatio(days):
             if day == getMaxDay(days):
                 daily_basic_all.loc[index, 'purchase_sum_per'] = float(100*daily_basic_all['purchase_sum'][index])/daily_basic_all['float_share'][index]
     
-    daily_basic_all = daily_basic_all.sort_index(axis=0,by='purchase_sum_per',ascending=False)
+    daily_basic_all = daily_basic_all.sort_values(axis=0,by='purchase_sum_per',ascending=False)
     print(daily_basic_all)
     write_excel(daily_basic_all, 'MainControl')
 def getIterator(days):
     """
-    获取days前的迭代器
+    获取days前的生成器
     """
     i = 0
     max_day = days
@@ -301,6 +301,6 @@ def test():
 if __name__ == "__main__":
     ts.set_token("7e10445dc47be74db4cac3a6ebb22e049ed954d4d070234b36ec738a")
     # ts.set_token("8a4d963e3a1027bade337201ce469b63ddd997941c27e3a4f6b485d5")
-    getMainControlPanelRatio(1)
+    getMainControlPanelRatio(20)
     # test()
     # print(getMaxDay(5))
