@@ -127,4 +127,4 @@ def write_excel(data, filename='default'):
         title[index] = util.title[name]
         # print(title)
     path = os.path.join(get_file_path(), "resource", filename+'.xlsx')
-    data.to_excel(path)
+    data.to_excel(path, index=False)
