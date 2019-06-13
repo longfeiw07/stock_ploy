@@ -1,6 +1,17 @@
 # -*- coding: utf-8 -*-
+import os
+import sys
 import datetime
 from chinese_calendar import is_workday, is_holiday
+import utils.util as util
+def get_file_path():
+    # 获取脚本路径
+    path = sys.path[0]
+    # 判断为脚本文件还是py2exe编译后的文件，如果是脚本文件，则返回的是脚本的目录，如果是py2exe编译后的文件，则返回的是编译后的文件路径
+    if os.path.isdir(path):
+        return path
+    elif os.path.isfile(path):
+        return os.path.dirname(path)
 def getDate(n ,date=None):
         """
         得到指定某天的第n天
@@ -46,3 +57,74 @@ def isOverTime():
         return True
     else:
         return False
+def getDateIterator(days, islater=False):
+    """
+    获取生成器，days天前到当天，islater为False，返回days天前生成器，islater为True，返回days天后生成器
+    """
+    i = 0
+    max_day = days
+    while i < max_day:
+        if islater:
+            date = getDate(i)
+        else:
+            date = getDate(-i)
+        if isHolidayOrWeekend(date):
+            max_day += 1
+        else: 
+            if i == 0 and isOverTime():
+                max_day += 1
+            else:
+                yield date
+        i += 1
+def getDateIteratorWithTimer(starttime, endtime):
+    """
+    获取每天的生成器,starttime:开始时间，endtime:结束时间
+    """
+    for i in range(getDiscrepancy(starttime, endtime)+1):
+        day = getDate(i, starttime)
+        if not isHolidayOrWeekend(day):
+            yield day
+def getMaxDay(days, islater=False):
+    """
+    获取days天前的日期
+    """
+    i = 0
+    max_day = days
+    while i < max_day:
+        if islater:
+            date = getDate(i)
+        else:
+            date = getDate(-i)
+        if isHolidayOrWeekend(date):
+            max_day += 1
+        else: 
+            if i == 0 and isOverTime():
+                 max_day += 1
+        i += 1
+    if islater:
+        return getDate(max_day - 1)
+    else:
+        return getDate(-(max_day - 1))
+def getMinDay(starttime, islater=False):
+    """
+    获取最开始的时间
+    """
+    timer = starttime
+    i = 0
+    while isHolidayOrWeekend(timer):
+        if islater:
+            timer = getDate(i, starttime)
+        else:
+            timer = getDate(-i, starttime)
+        i += 1
+    return timer
+def write_excel(data, filename='default'):
+    '''写入excel'''
+    columns = data.columns
+    # print(type(columns))
+    title = columns.values
+    for index, name in enumerate(title):
+        title[index] = util.title[name]
+        # print(title)
+    path = os.path.join(get_file_path(), "resource", filename+'.xlsx')
+    data.to_excel(path)

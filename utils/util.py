@@ -1,13 +1,3 @@
-import os
-import sys
-def get_file_path():
-    # 获取脚本路径
-    path = sys.path[0]
-    # 判断为脚本文件还是py2exe编译后的文件，如果是脚本文件，则返回的是脚本的目录，如果是py2exe编译后的文件，则返回的是编译后的文件路径
-    if os.path.isdir(path):
-        return path
-    elif os.path.isfile(path):
-        return os.path.dirname(path)
 
 title = {"code":"代码", "symbol": "ID", "name": "名称", "industry": "所属行业", "date":"日期", "open": "开盘价", "settlement":"昨日收盘价", "high":"最高价", "close": "收盘价", "low":"最低价","volume":"成交量", "amount": "成交金额", "price_change": "价格变动","p_change":"涨跌幅", 
     "ma5": "5日均价", "ma10": "10日均价", "ma20": "20日均价", "v_ma5": "5日均量", "v_ma10": "10日均量", "v_ma20": "20日均量", "turnover": "换手率",
