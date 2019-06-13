@@ -63,6 +63,7 @@ def getMainControlPanelRatio(starttime, endtime):
     purchase_sum_per = 100*purchase_sum_series
     tock_names['purchase_sum_per'] = purchase_sum_per
     tock_names.drop(columns='float_share', inplace=True)
+    tock_names = tock_names.dropna(subset=['purchase_sum_per'])
     tock_names = tock_names.sort_values(axis=0,by='purchase_sum_per',ascending=False)
     print('tock_names:',tock_names)
     tools.write_excel(tock_names, 'MainControlPanel_add')
