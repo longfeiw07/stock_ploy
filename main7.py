@@ -12,6 +12,7 @@ import pandas as pd
 import copy
 import gc
 
+engine = create_engine('sqlite:///tushare.db')
 ##获取股票列表
 def get_stock_list():
     pro = ts.pro_api()
@@ -65,18 +66,18 @@ def getMainControlPanelRatio(starttime, endtime):
     tock_names.drop(columns='float_share', inplace=True)
     tock_names = tock_names.dropna(subset=['purchase_sum_per'])
     tock_names = tock_names.sort_values(axis=0,by='purchase_sum_per',ascending=False)
-    print('tock_names:',tock_names)
-    tools.write_excel(tock_names, 'MainControlPanel_add')
+    # print('tock_names:',tock_names)
+    tools.write_excel(tock_names, 'MainControlPanel_test')
 
 def getTickDatas(day):
     """
     获取分笔数据
     """
-    engine = create_engine('mysql+pymysql://root:nopwd@mysql@localhost:3306/tushare')
     try:
         table_name = 'tick_data_{}'.format(day)  
         sql_cmd = "SELECT * FROM {}".format(table_name)
-        historical_tick = pd.read_sql(sql=sql_cmd, con=engine)
+        with engine.connect() as con:
+            historical_tick = pd.read_sql(sql=sql_cmd, con=con)
         return historical_tick
         
     except Exception as identifier:
