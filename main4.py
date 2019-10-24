@@ -6,7 +6,6 @@ import utils.util as util
 import tushare as ts
 import numpy as np
 import datetime
-from utils.DataBaseHandle import DataBaseHandle
 import pandas as pd
 import utils.tools as tools
 from sqlalchemy import create_engine
@@ -124,8 +123,8 @@ def check_table(name, isForce=False):
     return False
 def main():
     #数据入库
-    get_table_list()
-    # db_tick_data('20190613', '20190613')
+    # get_table_list()
+    db_tick_data('20190613', '20190613')
     # db_daily_basic('20190603', '20190603')
     # db_top_list('20190501', '20190601')  
     # get_stock_basic('20190506')

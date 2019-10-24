@@ -7,6 +7,8 @@ import csv
 import utils.util as util
 import time
 import datetime
+import asyncio
+import aiohttp
 class Reptile():
     def __init__(self, start, end, isappend):
         self._startTime = start
@@ -67,7 +69,7 @@ class Reptile():
                 # print('response:', response)
                 self.__pageAll = re.search(r"\"TotalPage\":(\d+)", response).group(1)
                 title = re.search(r"\"FieldName\":\"(.*?)\"", response).group(1)
-                # print(page_all)
+                # print(self.__pageAll)
                 result = re.search(r"\"Data\":(\[.*\])", response).group(1)
                 data = re.search(r"\"Data\":(\[.*?\])", result).group(1)
                 
@@ -112,7 +114,7 @@ class Reptile():
         if self.CalTime(start, end) < 2:
             print('时间间隔不足2天，数据不全')
             return
-        for page in range(1, self.__pageAll):
+        for page in range(1, int(self.__pageAll)+1):
             datas_iter = self.GetTable(page, start,end)[1]
             self.WriteTable(datas_iter)
         
@@ -121,7 +123,7 @@ class Reptile():
         """
         print('天数：', self.CalTime(self._startTime, self._endTime))
         if self.isAppend == 'no':
-            self.WriteHeader(self.GetTable(0, self._startTime, self.DesignatedOneDay(self._startTime, 2))[2])
+            self.WriteHeader(self.GetTable(0, self._startTime, self.DesignatedOneDay(self._startTime, 2))[0])
 
         if self.IsData(self._startTime) and self.IsData(self._endTime):
             if self.CalTime(self._startTime, self._endTime) <= 30:
