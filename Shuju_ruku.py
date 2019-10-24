@@ -121,15 +121,40 @@ def check_table(name, isForce=False):
     else:
         return False
     return False
+
+def db_choumafenbu_ruku(start, end):
+    """
+    筹码分布数据入库
+    """
+    pro = ts.pro_api()
+    for day in getDateIterator(start, end):
+        table_name = 'choumafenbu_{}'.format(day)
+        if check_table(table_name):
+            continue
+        daily_basic = pro.daily_basic(ts_code='', trade_date=day, fields='ts_code,turnover_rate,float_share')
+        daily_basic.set_index(['ts_code'], inplace = True, drop=True)
+        daily = pro.daily(trade_date=day)
+        daily.set_index(['ts_code'], inplace = True, drop=True)
+        vol = daily['amount']*1000/daily['vol']/100
+        daily_basic['vol'] = vol
+        # print(daily_basic)
+
+        engine = create_engine('sqlite:///tushare.db')
+        with engine.connect() as con:
+            # table_name = 'tick_data_{}'.format(day)
+            # print(table_name)
+            daily_basic.to_sql(table_name, con, index= False, if_exists='replace')
+        
+
 def main():
     #数据入库
     # get_table_list()
-    db_tick_data('20190613', '20190613')
+    db_choumafenbu_ruku('20190613', '20190613')
     # db_daily_basic('20190603', '20190603')
     # db_top_list('20190501', '20190601')  
     # get_stock_basic('20190506')
       
 
 if __name__ == "__main__":    
-    ts.set_token("7e10445dc47be74db4cac3a6ebb22e049ed954d4d070234b36ec738a")   
+    ts.set_token("478f21f5f334c11290a7f8c9646a838bb1bba46ce68d4d69ecf5f447")   
     main()
