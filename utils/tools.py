@@ -128,3 +128,13 @@ def write_excel(data, filename='default'):
         # print(title)
     path = os.path.join(get_file_path(), "resource", filename+'.xlsx')
     data.to_excel(path, index=False)
+
+def getDateIterator(starttime, endtime):
+    """
+    获取每天的生成器
+    """
+    for i in range(getDiscrepancy(starttime, endtime)+1):
+        day = getDate(i, starttime)
+        if not isHolidayOrWeekend(day):
+            # print('day:', day)
+            yield day

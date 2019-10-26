@@ -129,15 +129,18 @@ def db_choumafenbu_ruku(start, end):
     pro = ts.pro_api()
     for day in getDateIterator(start, end):
         table_name = 'choumafenbu_{}'.format(day)
-        if check_table(table_name):
-            continue
+        # if check_table(table_name):
+        #     continue
+        print(table_name)
         daily_basic = pro.daily_basic(ts_code='', trade_date=day, fields='ts_code,turnover_rate,float_share')
-        daily_basic.set_index(['ts_code'], inplace = True, drop=True)
+        daily_basic.set_index(['ts_code'], inplace = True, drop=False)
         daily = pro.daily(trade_date=day)
         daily.set_index(['ts_code'], inplace = True, drop=True)
-        vol = daily['amount']*1000/daily['vol']/100
-        daily_basic['vol'] = vol
-        # print(daily_basic)
+        daily_basic['vol'] = daily['vol']
+        daily_basic['amount'] = daily['amount']
+        average_price = daily['amount']*1000/daily['vol']/100
+        daily_basic['average'] = average_price
+        print(daily_basic)
 
         engine = create_engine('sqlite:///tushare.db')
         with engine.connect() as con:
@@ -145,11 +148,18 @@ def db_choumafenbu_ruku(start, end):
             # print(table_name)
             daily_basic.to_sql(table_name, con, index= False, if_exists='replace')
         
-
+def get_choumafenbu(day):
+    '''从数据库读取每日指标'''
+    engine = create_engine('sqlite:///tushare.db')
+    with engine.connect() as con:
+        table_name = 'choumafenbu_{}'.format(day)  
+        sql_cmd = "SELECT * FROM {} ORDER BY ts_code".format(table_name)
+        df = pd.read_sql(sql=sql_cmd, con=con)
+        return df
 def main():
     #数据入库
     # get_table_list()
-    db_choumafenbu_ruku('20190613', '20190613')
+    db_choumafenbu_ruku('20190908', '20191025')
     # db_daily_basic('20190603', '20190603')
     # db_top_list('20190501', '20190601')  
     # get_stock_basic('20190506')
