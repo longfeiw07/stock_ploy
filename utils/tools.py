@@ -4,6 +4,8 @@ import sys
 import datetime
 from chinese_calendar import is_workday, is_holiday
 import utils.util as util
+sys.setrecursionlimit(1000000)
+
 def get_file_path():
     # 获取脚本路径
     path = sys.path[0]
@@ -25,6 +27,23 @@ def getDate(n ,date=None):
         date = date + datetime.timedelta(days=n)
         date = date.strftime("%Y%m%d")
         return date
+def getDateWithoutHoliday(n ,date=None):
+    """
+    得到指定某天的第n天,且不是节假日
+            :param date:
+            :return:
+    """
+    if date is None:
+        date = datetime.date.today()
+    else:
+        date = datetime.datetime.strptime(date, "%Y%m%d") 
+    date = date + datetime.timedelta(days=n)
+    date = date.strftime("%Y%m%d")
+    if isHolidayOrWeekend(date):
+        return getDateWithoutHoliday(n, date)
+    # print('返回：', date)
+    return date
+
 def getDiscrepancy(start, end):
     '''获取相差多少天'''
     start_sec = datetime.datetime.strptime(start, '%Y%m%d')
@@ -35,7 +54,7 @@ def getDiscrepancy(start, end):
 def isHolidayOrWeekend(day):
     """
     判断是否是星期六 0-周一，1-周二.....5-周六，6-周日, 返回值是<int>类型
-    :param day:
+    :param day: %Y%m%d
     :return:
     """
     april_last = datetime.date(int(day[:4]), int(day[4:6]), int(day[6:]))

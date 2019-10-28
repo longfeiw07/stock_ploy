@@ -131,7 +131,6 @@ def db_choumafenbu_ruku(start, end):
         table_name = 'choumafenbu_{}'.format(day)
         # if check_table(table_name):
         #     continue
-        print(table_name)
         daily_basic = pro.daily_basic(ts_code='', trade_date=day, fields='ts_code,turnover_rate,float_share')
         daily_basic.set_index(['ts_code'], inplace = True, drop=False)
         daily = pro.daily(trade_date=day)
@@ -140,12 +139,10 @@ def db_choumafenbu_ruku(start, end):
         daily_basic['amount'] = daily['amount']
         average_price = daily['amount']*1000/daily['vol']/100
         daily_basic['average'] = average_price
-        print(daily_basic)
+        # print(daily_basic)
 
         engine = create_engine('sqlite:///tushare.db')
         with engine.connect() as con:
-            # table_name = 'tick_data_{}'.format(day)
-            # print(table_name)
             daily_basic.to_sql(table_name, con, index= False, if_exists='replace')
         
 def get_choumafenbu(day):
@@ -159,7 +156,7 @@ def get_choumafenbu(day):
 def main():
     #数据入库
     # get_table_list()
-    db_choumafenbu_ruku('20190908', '20191025')
+    db_choumafenbu_ruku('20180101', '20190101')
     # db_daily_basic('20190603', '20190603')
     # db_top_list('20190501', '20190601')  
     # get_stock_basic('20190506')
