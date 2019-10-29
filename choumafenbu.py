@@ -67,7 +67,7 @@ def get_profit_amount(code, day):
         per_shou = np.around(count*rate)
 
         print("day:{0}, code:{7}, count:{1}, turnover_rate:{2}, rate:{3}, per_shou:{4}, amount:{5}, float_share: {6}, jishu: {8}, amount:{9}".format(day, count, turnover_rate, rate, per_shou, amount, float_share, code, jishu, amount))
-        if per_shou <= 1 or amount >= float_share or jishu >= 365:
+        if per_shou <= 1 or amount >= float_share or jishu >= 30:
             return amount
         amount += per_shou
     rate = rate*(1-turnover_rate)
