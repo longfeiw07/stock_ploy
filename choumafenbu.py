@@ -74,6 +74,6 @@ def get_profit_amount(code, day):
     jishu += 1
     return get_profit_amount(code, tools.getDateWithoutHoliday(-1, day))
 
-def filter
+
 
 jisuan_choumafenbu('20191024', '20191024')
