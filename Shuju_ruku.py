@@ -156,7 +156,7 @@ def get_choumafenbu(day):
 def main():
     #数据入库
     # get_table_list()
-    db_choumafenbu_ruku('20180101', '20190101')
+    db_choumafenbu_ruku('20180101', '20191029')
     # db_daily_basic('20190603', '20190603')
     # db_top_list('20190501', '20190601')  
     # get_stock_basic('20190506')
