@@ -31,7 +31,7 @@ def jisuan_choumafenbu(start, end):
             profit_amount = get_profit_amount(ts_code, day)
             if not profit_amount:
                 continue
-            profit_per = (profit_amount - row['vol']) / (float_share*10000)
+            profit_per = ((profit_amount - row['vol'])*100) / (float_share*10000)
             profit_list[ts_code] = str(profit_per)
         profit_series = pd.Series(profit_list, name="profit")
         
@@ -74,6 +74,6 @@ def get_profit_amount(code, day):
     jishu += 1
     return get_profit_amount(code, tools.getDateWithoutHoliday(-1, day))
 
-
+def filter
 
 jisuan_choumafenbu('20191024', '20191024')
