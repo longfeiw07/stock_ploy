@@ -67,30 +67,35 @@ def isHolidayOrWeekend(day):
     if day_week == 5 or day_week == 6:
         return True
     return False
-def isOverTime():
-    '''当前是否超过18点'''
+def isOverTime(date):
+    '''当前是否未超过18点'''
     now = datetime.datetime.now()
     now_str = now.strftime('%Y%m%d %H%M%S')
     timer = now_str.split(' ')
-    if int(str(timer[1][:2])) < 18:
-        return True
+    if date == str(timer[0]):
+        if int(str(timer[1][:2])) < 18:
+            print('未超过18点，没有今天数据！！')
+            return True
+        else:
+            return False
     else:
         return False
-def getDateIterator(days, islater=False):
+    
+def getDateIterator(n, input_date=None, islater=False):
     """
-    获取生成器，days天前到当天，islater为False，返回days天前生成器，islater为True，返回days天后生成器
+    获取生成器，n天前到当天，islater为False，返回n天前生成器，islater为True，返回n天后生成器
     """
     i = 0
-    max_day = days
+    max_day = n
     while i < max_day:
         if islater:
-            date = getDate(i)
+            date = getDate(i, input_date)
         else:
-            date = getDate(-i)
+            date = getDate(-i, input_date)
         if isHolidayOrWeekend(date):
             max_day += 1
         else: 
-            if i == 0 and isOverTime():
+            if isOverTime(input_date):
                 max_day += 1
             else:
                 yield date
@@ -148,7 +153,7 @@ def write_excel(data, filename='default'):
     path = os.path.join(get_file_path(), "resource", filename+'.xlsx')
     data.to_excel(path, index=False)
 
-def getDateIterator(starttime, endtime):
+def getEverydayIterator(starttime, endtime):
     """
     获取每天的生成器
     """

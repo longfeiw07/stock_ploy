@@ -122,9 +122,9 @@ def check_table(name, isForce=False):
         return False
     return False
 
-def db_choumafenbu_ruku(start, end):
+def db_junjia_ruku(start, end):
     """
-    筹码分布数据入库
+    计算获利盘比例时的均价数据入库
     """
     pro = ts.pro_api()
     for day in getDateIterator(start, end):
@@ -145,21 +145,106 @@ def db_choumafenbu_ruku(start, end):
         with engine.connect() as con:
             daily_basic.to_sql(table_name, con, index= False, if_exists='replace')
         
-def get_choumafenbu(day):
-    '''从数据库读取每日指标'''
+def get_junjia(day):
+    '''从数据库读取每日指标，包括均价'''
     engine = create_engine('sqlite:///tushare.db')
     with engine.connect() as con:
         table_name = 'choumafenbu_{}'.format(day)  
         sql_cmd = "SELECT * FROM {} ORDER BY ts_code".format(table_name)
         df = pd.read_sql(sql=sql_cmd, con=con)
         return df
+
+jishu = 0
+amount = 0
+rate = 1
+def db_huolipanbili_ruku(start, end):
+    '''计算获利盘比例，并入库'''
+    for day in tools.getEverydayIterator(start, end):
+        datas = get_junjia(day)
+        datas.set_index(['ts_code'], inplace = True, drop=False)
+        # print(datas)
+        profit_list = {}
+        for index, row in datas.iterrows():
+            global jishu
+            global amount 
+            global rate
+            jishu = 0
+            amount = 0
+            rate = 1
+            ts_code = row['ts_code']
+            float_share = row['float_share']
+            turnover_rate = row['turnover_rate']/100
+            profit_amount = get_profit_amount(ts_code, day)
+            if not profit_amount:
+                continue
+            profit_per = ((profit_amount - row['vol'])*100) / (float_share*10000)
+            profit_list[ts_code] = str(profit_per)
+        profit_series = pd.Series(profit_list, name="profit")
+        
+        datas['profit'] = profit_series
+        print('datas:', datas)
+        table_name = 'huolipanbili_{}'.format(day)
+        engine = create_engine('sqlite:///tushare.db')
+        with engine.connect() as con:
+            datas.to_sql(table_name, con, index= False, if_exists='replace')
+
+def get_profit_amount(code, day):
+    '''计算获利的股票数，因获利盘比例=获利的股票数/流通股数'''
+    datas_current = get_junjia(day)
+    datas_current.set_index(['ts_code'], inplace = True, drop=False)
+    # count = datas_current.get_value(code, 'vol')                    #成交量**手
+    try:
+        count = datas_current['vol'][code]
+    except KeyError as e:
+        return None
+    turnover_rate = datas_current['turnover_rate'][code]/100  #换手率
+    float_share = datas_current['float_share'][code]*100
+    global jishu
+    global amount 
+    global rate
+    
+    if jishu == 0:
+        amount += count
+        # print("day:{0}, code:{6}, count:{1}, turnover_rate:{2}, rate:{3}, amount:{4}, float_share: {5}, jishu: {7}, amount:{8}".format(day, count, turnover_rate, rate, amount, float_share, code, jishu, amount))
+    else:
+        per_shou = np.around(count*rate)
+
+        # print("day:{0}, code:{7}, count:{1}, turnover_rate:{2}, rate:{3}, per_shou:{4}, amount:{5}, float_share: {6}, jishu: {8}, amount:{9}".format(day, count, turnover_rate, rate, per_shou, amount, float_share, code, jishu, amount))
+        if per_shou <= 1 or amount >= float_share or jishu >= 30:
+            return amount
+        amount += per_shou
+    rate = rate*(1-turnover_rate)
+    jishu += 1
+    return get_profit_amount(code, tools.getDateWithoutHoliday(-1, day))
+
+def get_huolipanbili(day):
+    """获取获利盘比例"""
+    engine = create_engine('sqlite:///tushare.db')
+    with engine.connect() as con:
+        table_name = 'huolipanbili_{}'.format(day)  
+        sql_cmd = "SELECT * FROM {} ORDER BY ts_code".format(table_name)
+        df = pd.read_sql(sql=sql_cmd, con=con)
+        return df
+def get_huolipanbili_with_code(day, code):
+    """根据股票代码ts_code获取获利盘比例"""
+    engine = create_engine('sqlite:///tushare.db')
+    with engine.connect() as con:
+        table_name = 'huolipanbili_{}'.format(day)  
+        sql_cmd = "SELECT * FROM {0} WHERE ts_code='{1}'".format(table_name, code)
+        df = pd.read_sql(sql=sql_cmd, con=con)
+        return df
+
+
+
 def main():
     #数据入库
     # get_table_list()
-    db_choumafenbu_ruku('20180101', '20191029')
     # db_daily_basic('20190603', '20190603')
     # db_top_list('20190501', '20190601')  
     # get_stock_basic('20190506')
+    #计算获利盘比例
+    # db_junjia_ruku('20180101', '20191029')
+    db_huolipanbili_ruku('20191001', '20191023')
       
 
 if __name__ == "__main__":    
